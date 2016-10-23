@@ -14,20 +14,11 @@
 }
 
 %{
-
 using namespace std;
-// stuff from flex that bison needs to know about:
 extern int yylex();
 extern int yyparse();
-extern FILE *yyin;
 void yyerror(const char* msg) {
   fprintf(stderr, "%s", msg);
-}
-
-std::string clean_tag(char* token) {
-  std::string str = string(token);
-  boost::erase_all(str, "%");
-  return str;
 }
 %}
 
@@ -37,54 +28,50 @@ std::string clean_tag(char* token) {
 }
 
 %token DOCTYPE
-%token TAG
-%token ATTRIBUTE_KEY
+%token TAG_NAME
+%token TAG_CLASS
+%token DIV
+%token ATTRIBUTE_NAME
 %token STRING_LITERAL
-%token HTML_ATTRIBUTE
-%token FREE_TEXT
-
-%type <tag> html_tag
-%type <sval> fragment
-%type <sval> TAG
+%token IDENTIFIER
 
 %%
 
-haml:
-    fragment
+haml
+    : fragment
     | haml fragment
     ;
 
 fragment
-        : html_tag
-        ;
+       : html_tag
+       ;
 
 html_tag
-   : TAG '{' html_attribute_list '}'
-   | TAG '{' html_attribute_list '}'
-   | TAG
-   ;
+       : TAG_NAME '{' html_attribute_list '}'
+       | TAG_NAME
+       | DIV
+       ;
 
 html_attribute_list
-                  : HTML_ATTRIBUTE
-                  | html_attribute_list ',' HTML_ATTRIBUTE
+                  : html_attribute
+                  | html_attribute_list ',' html_attribute
                   ;
+html_attribute
+             : ATTRIBUTE_NAME ':' attribute_value
+             ;
+
+attribute_value
+              : STRING_LITERAL
+              | function_call
+              ;
+
+function_call
+            : IDENTIFIER
+            ;
+
 
 %%
 
 int main(int argc, char** argv) {
-  // open a file handle to a particular file:
-  //FILE *myfile = fopen("in.snazzle", "r");
-  // make sure it's valid:
-  //if (!myfile) {
-  //  cout << "I can't open a.snazzle.file!" << endl;
-  //  return -1;
-  //}
-  // set flex to read from it instead of defaulting to STDIN:
-  //yyin = myfile;
-
-  // parse through the input until there is no more:
-  //do {
-  //  yyparse();
-  //} while (!feof(yyin));
   yyparse();
 }

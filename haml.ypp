@@ -1,0 +1,90 @@
+%error-verbose
+%require "3.0"
+
+%code requires
+{
+    #include "html_tag.hpp"
+}
+
+%code top
+{
+    #include <iostream>
+    #include <string>
+    #include <boost/algorithm/string.hpp>
+}
+
+%{
+
+using namespace std;
+// stuff from flex that bison needs to know about:
+extern int yylex();
+extern int yyparse();
+extern FILE *yyin;
+void yyerror(const char* msg) {
+  fprintf(stderr, "%s", msg);
+}
+
+std::string clean_tag(char* token) {
+  std::string str = string(token);
+  boost::erase_all(str, "%");
+  return str;
+}
+%}
+
+%union {
+  char *sval;
+  HtmlTag *tag;
+}
+
+%token DOCTYPE
+%token TAG
+%token ATTRIBUTE_KEY
+%token STRING_LITERAL
+%token HTML_ATTRIBUTE
+%token FREE_TEXT
+
+%type <tag> html_tag
+%type <sval> fragment
+%type <sval> TAG
+
+%%
+
+haml:
+    fragment
+    | haml fragment
+    ;
+
+fragment
+        : html_tag
+        ;
+
+html_tag
+   : TAG '{' html_attribute_list '}'
+   | TAG '{' html_attribute_list '}'
+   | TAG
+   ;
+
+html_attribute_list
+                  : HTML_ATTRIBUTE
+                  | html_attribute_list ',' HTML_ATTRIBUTE
+                  ;
+
+%%
+
+int main(int argc, char** argv) {
+  // open a file handle to a particular file:
+  //FILE *myfile = fopen("in.snazzle", "r");
+  // make sure it's valid:
+  //if (!myfile) {
+  //  cout << "I can't open a.snazzle.file!" << endl;
+  //  return -1;
+  //}
+  // set flex to read from it instead of defaulting to STDIN:
+  //yyin = myfile;
+
+  // parse through the input until there is no more:
+  //do {
+  //  yyparse();
+  //} while (!feof(yyin));
+  yyparse();
+}

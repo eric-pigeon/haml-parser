@@ -47,10 +47,20 @@ fragment
        ;
 
 html_tag
-       : TAG_NAME '{' html_attribute_list '}'
-       | TAG_NAME
+       : html_tag_start '{' html_attribute_list '}'
+       | html_tag_start
        | DIV
        ;
+
+html_tag_start
+             : TAG_NAME TAG_CLASSES
+             | TAG_NAME
+             ;
+
+TAG_CLASSES
+          : TAG_CLASS TAG_CLASSES
+          | TAG_CLASS
+          ;
 
 html_attribute_list
                   : html_attribute

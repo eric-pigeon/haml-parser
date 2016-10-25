@@ -59,12 +59,12 @@ html_tag
        ;
 
 html_tag_start
-             : TAG_NAME TAG_CLASSES
+             : TAG_NAME tag_classes
              | TAG_NAME
              ;
 
-TAG_CLASSES
-          : TAG_CLASS TAG_CLASSES
+tag_classes
+          : TAG_CLASS tag_classes
           | TAG_CLASS
           ;
 
